@@ -31,7 +31,7 @@ export class ChessGameManager {
   }
 
   getMoves(): Move[] {
-    return this.chess.history({ verbose: true })
+    return this.chess.history({ verbose: true }) as Move[]
   }
 
   getAllFens(): string[] {
@@ -64,10 +64,16 @@ export class ChessGameManager {
   loadMoves(moves: string[]): boolean {
     try {
       this.chess = new Chess()
-      for (const move of moves) {
+      for (let i = 0; i < moves.length; i++) {
+        const move = moves[i]
+        // Skip empty or invalid moves
+        if (!move || move.trim() === '') continue
+        
         const result = this.chess.move(move)
         if (!result) {
-          throw new Error(`Invalid move: ${move}`)
+          console.warn(`Invalid move at position ${i + 1}: ${move}`)
+          // Don't throw error, just return false
+          return false
         }
       }
       return true
@@ -89,9 +95,16 @@ export class ChessGameManager {
 
     // Split by spaces and filter out empty strings and incomplete moves
     const moves = cleanText.split(' ').filter(move => {
-      // Only include moves that are at least 2 characters long
-      // This prevents single characters like 'e' from being treated as moves
-      return move.length >= 2 && move.trim() !== ''
+      const trimmedMove = move.trim()
+      // Only include moves that are at least 2 characters long and look like valid chess moves
+      return trimmedMove.length >= 2 && 
+             trimmedMove !== '' && 
+             // Match various chess move patterns:
+             // - Pawn moves: e4, e5, exd5, e8=Q
+             // - Piece moves: Nf3, Bxe4, Qxd8+
+             // - Castling: O-O, O-O-O
+             // - Basic coordinates: e4, d5
+             /^([KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](=[QRBN])?[+#]?|O-O(-O)?|[a-h][1-8])$/.test(trimmedMove)
     })
     
     return moves
