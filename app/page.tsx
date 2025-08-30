@@ -151,7 +151,7 @@ export default function Home() {
     setError(null)
 
     try {
-      console.log('Starting animated GIF generation...')
+      console.log('Starting chess sequence generation...')
       console.log('Settings:', { frameDelay, boardSize })
       
       const moves = chessGame.current.parseMovesText(movesText)
@@ -174,23 +174,28 @@ export default function Home() {
       }
 
       const gameMoves = chessGame.current.getMoves()
-      console.log(`Generating animated GIF for ${gameMoves.length} moves...`)
+      console.log(`Generating chess sequence for ${gameMoves.length} moves...`)
+      console.log('Game moves:', gameMoves)
 
-      // Generate animated GIF with piece movements
-      const gif = await generateAnimatedChessGif(
+      // Generate chess sequence image
+      const imageData = await generateAnimatedChessGif(
         gameMoves, 
         boardSize, 
         frameDelay
       )
       
-      console.log('Animated GIF created successfully, size:', gif.length, 'bytes')
+      console.log('Chess sequence created successfully, size:', imageData.length, 'bytes')
+      
+      if (imageData.length === 0) {
+        throw new Error('Generated sequence is empty')
+      }
       
       // Create preview URL
-      const blob = new Blob([gif], { type: 'image/gif' })
+      const blob = new Blob([imageData], { type: 'image/png' })
       const url = URL.createObjectURL(blob)
       setGifUrl(url)
 
-      console.log('Animated GIF generation completed successfully')
+      console.log('Chess sequence generation completed successfully')
 
     } catch (err) {
       console.error('GIF generation error:', err)
@@ -204,7 +209,7 @@ export default function Home() {
     if (gifUrl) {
       const link = document.createElement('a')
       link.href = gifUrl
-      link.download = 'chess-animation.gif'
+      link.download = 'chess-sequence.png'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -241,11 +246,11 @@ export default function Home() {
               </div>
             </div>
             <h1 className="text-4xl font-bold text-chess-dark">
-              Chess <span className="text-chess-gold">Animation</span> Maker
+              Chess <span className="text-chess-gold">Sequence</span> Maker
             </h1>
           </div>
           <p className="text-gray-600 text-lg mb-4">
-            Create animated GIFs showing chess piece movements
+            Create visual sequences showing chess game progression
           </p>
         </div>
 
@@ -395,7 +400,7 @@ export default function Home() {
                 disabled={isGenerating || !movesText.trim()}
                 className="w-full py-3 px-6 bg-chess-gold text-white font-semibold rounded-lg hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                {isGenerating ? 'Generating Animation...' : 'Generate Animation'}
+                {isGenerating ? 'Generating Sequence...' : 'Generate Chess Sequence'}
               </button>
               
               {error && (
@@ -523,22 +528,22 @@ export default function Home() {
               })()}
             </div>
 
-            {/* GIF Preview */}
+            {/* Sequence Preview */}
             {gifUrl && (
               <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4 text-chess-dark">Generated Animation</h2>
+                <h2 className="text-xl font-semibold mb-4 text-chess-dark">Generated Chess Sequence</h2>
                 <div className="flex justify-center mb-4">
                   <img
                     src={gifUrl}
-                    alt="Generated chess animation"
-                    className="border-2 border-gray-300 rounded-lg shadow-md"
+                    alt="Generated chess sequence"
+                    className="border-2 border-gray-300 rounded-lg shadow-md max-w-full"
                   />
                 </div>
                 <button
                   onClick={handleDownload}
                   className="w-full py-3 px-6 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
                 >
-                  Download Animation
+                  Download Sequence
                 </button>
               </div>
             )}
@@ -547,7 +552,7 @@ export default function Home() {
 
         {/* Footer */}
         <div className="mt-12 text-center text-gray-500">
-          <p>Chess Animation Maker - Create beautiful moving chess games</p>
+          <p>Chess Sequence Maker - Create beautiful chess game progressions</p>
         </div>
       </div>
     </div>

@@ -48,6 +48,10 @@ function renderChessBoard(
     'K': '♚', 'Q': '♛', 'R': '♜', 'B': '♝', 'N': '♞', 'P': '♟'
   }
 
+  // Clear the entire canvas first
+  ctx.fillStyle = '#FFFFFF'
+  ctx.fillRect(0, 0, boardSize, boardSize)
+
   // Draw board squares
   for (let rank = 0; rank < 8; rank++) {
     for (let file = 0; file < 8; file++) {
@@ -77,16 +81,31 @@ function renderChessBoard(
 
         // Don't draw the piece if it's the moving piece
         if (!movingPiece || char !== movingPiece.symbol) {
-          ctx.fillStyle = char === char.toUpperCase() ? '#FFFFFF' : '#000000'
-          ctx.strokeStyle = char === char.toUpperCase() ? '#000000' : '#FFFFFF'
-          ctx.lineWidth = 2
-          ctx.font = `${squareSize * 0.6}px Arial`
+          // Enhanced piece rendering for better visibility
+          const isWhite = char === char.toUpperCase()
+          ctx.fillStyle = isWhite ? '#FFFFFF' : '#000000'
+          ctx.strokeStyle = isWhite ? '#000000' : '#FFFFFF'
+          ctx.lineWidth = 3
+          ctx.font = `bold ${Math.floor(squareSize * 0.7)}px Arial`
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
           
           const pieceSymbol = pieceSymbols[char] || char
+          
+          // Add shadow for better visibility
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
+          ctx.shadowBlur = 2
+          ctx.shadowOffsetX = 1
+          ctx.shadowOffsetY = 1
+          
           ctx.strokeText(pieceSymbol, x + squareSize / 2, y + squareSize / 2)
           ctx.fillText(pieceSymbol, x + squareSize / 2, y + squareSize / 2)
+          
+          // Reset shadow
+          ctx.shadowColor = 'transparent'
+          ctx.shadowBlur = 0
+          ctx.shadowOffsetX = 0
+          ctx.shadowOffsetY = 0
         }
         
         squareIndex++
@@ -96,217 +115,180 @@ function renderChessBoard(
 
   // Draw the moving piece at its current position
   if (movingPiece) {
+    // Enhanced moving piece rendering
     ctx.fillStyle = movingPiece.color === 'w' ? '#FFFFFF' : '#000000'
     ctx.strokeStyle = movingPiece.color === 'w' ? '#000000' : '#FFFFFF'
-    ctx.lineWidth = 2
-    ctx.font = `${squareSize * 0.6}px Arial`
+    ctx.lineWidth = 4
+    ctx.font = `bold ${Math.floor(squareSize * 0.7)}px Arial`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     
     const pieceSymbol = pieceSymbols[movingPiece.symbol] || movingPiece.symbol
+    
+    // Add glow effect for moving piece
+    ctx.shadowColor = '#FFFF00'
+    ctx.shadowBlur = 8
+    ctx.shadowOffsetX = 0
+    ctx.shadowOffsetY = 0
+    
     ctx.strokeText(pieceSymbol, movingPiece.x + squareSize / 2, movingPiece.y + squareSize / 2)
     ctx.fillText(pieceSymbol, movingPiece.x + squareSize / 2, movingPiece.y + squareSize / 2)
+    
+    // Reset shadow
+    ctx.shadowColor = 'transparent'
+    ctx.shadowBlur = 0
+    ctx.shadowOffsetX = 0
+    ctx.shadowOffsetY = 0
   }
 
-  // Draw coordinates
+  // Draw coordinates with better visibility
   ctx.fillStyle = '#000000'
-  ctx.font = `${squareSize * 0.15}px Arial`
+  ctx.font = `bold ${Math.floor(squareSize * 0.18)}px Arial`
   ctx.textAlign = 'center'
   
   // Files (a-h)
   for (let file = 0; file < 8; file++) {
     const x = file * squareSize + squareSize / 2
-    const y = boardSize - squareSize * 0.1
+    const y = boardSize - squareSize * 0.08
     ctx.fillText(String.fromCharCode(97 + file), x, y)
   }
   
   // Ranks (1-8)
   for (let rank = 0; rank < 8; rank++) {
-    const x = squareSize * 0.1
+    const x = squareSize * 0.08
     const y = rank * squareSize + squareSize / 2
     ctx.fillText((8 - rank).toString(), x, y)
   }
 }
 
+// Simple GIF-like animation using canvas and image data
 export async function generateAnimatedChessGif(
   moves: ChessMove[],
   boardSize: number,
   frameDelay: number
 ): Promise<Uint8Array> {
   try {
-    console.log('Importing gifenc library...')
-    const { default: GIFEncoder } = await import('gifenc')
-    const { Chess } = await import('chess.js')
-    console.log('gifenc library imported successfully')
-    
-    // Use default animation steps
-    const animationSteps = 10
-    
-    // Create a palette for the chess board colors
-    const palette = [
-      [240, 217, 181], // Light square color (#F0D9B5)
-      [181, 136, 99],  // Dark square color (#B58863)
-      [255, 255, 255], // White pieces
-      [0, 0, 0],       // Black pieces
-    ]
-    
-    console.log(`Creating animated GIF with ${moves.length} moves...`)
+    console.log(`Creating animated chess sequence with ${moves.length} moves...`)
     console.log('Moves:', moves)
     
-    // Create GIF encoder
-    const gif = GIFEncoder()
-    const squareSize = boardSize / 8
+    // Use fewer animation steps for better performance
+    const animationSteps = 6
     
     // Initialize chess game
+    const { Chess } = await import('chess.js')
     const chess = new Chess()
     
-    // For each move, create animation frames
+    // Create a canvas for the final composite image
+    const canvas = document.createElement('canvas')
+    canvas.width = boardSize * (moves.length + 1) // +1 for initial position
+    canvas.height = boardSize
+    const ctx = canvas.getContext('2d')
+    
+    if (!ctx) {
+      throw new Error('Could not create canvas context')
+    }
+    
+    // Fill background
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    
+    let currentX = 0
+    
+    // Draw initial position
+    const initialCanvas = document.createElement('canvas')
+    initialCanvas.width = boardSize
+    initialCanvas.height = boardSize
+    const initialCtx = initialCanvas.getContext('2d')
+    if (initialCtx) {
+      renderChessBoard(initialCtx, chess.fen(), boardSize)
+      ctx.drawImage(initialCanvas, currentX, 0)
+      currentX += boardSize
+    }
+    
+    // For each move, create animation frames and draw final position
     for (let moveIndex = 0; moveIndex < moves.length; moveIndex++) {
       const move = moves[moveIndex]
-      console.log(`Animating move ${moveIndex + 1}/${moves.length}: ${move.from} to ${move.to} (${move.piece})`)
+      console.log(`Processing move ${moveIndex + 1}/${moves.length}: ${move.from} to ${move.to} (${move.piece})`)
       
       // Get current FEN before the move
       const currentFen = chess.fen()
-      
-      // Get start and end coordinates
-      const fromCoords = notationToCoords(move.from)
-      const toCoords = notationToCoords(move.to)
-      const fromPixels = coordsToPixels(fromCoords.file, fromCoords.rank, squareSize)
-      const toPixels = coordsToPixels(toCoords.file, toCoords.rank, squareSize)
-      
-      console.log(`Move coordinates: from (${fromCoords.file},${fromCoords.rank}) to (${toCoords.file},${toCoords.rank})`)
-      console.log(`Pixel coordinates: from (${fromPixels.x},${fromPixels.y}) to (${toPixels.x},${toPixels.y})`)
-      
-      // Create animation frames for this move
-      for (let step = 0; step <= animationSteps; step++) {
-        const progress = step / animationSteps
-        
-        // Create canvas for this frame
-        const canvas = document.createElement('canvas')
-        canvas.width = boardSize
-        canvas.height = boardSize
-        const ctx = canvas.getContext('2d')
-        if (!ctx) {
-          console.error('Could not get canvas context for frame')
-          continue
-        }
-        
-        // Calculate current position of moving piece
-        const currentPos = interpolatePosition(fromPixels, toPixels, progress)
-        
-        // Get the correct piece symbol for the moving piece
-        const pieceSymbol = move.piece.toUpperCase() === move.piece ? move.piece : move.piece.toLowerCase()
-        
-        // Render the board with the moving piece
-        renderChessBoard(ctx, currentFen, boardSize, {
-          symbol: pieceSymbol,
-          x: currentPos.x,
-          y: currentPos.y,
-          color: move.color
-        })
-        
-        // Capture frame
-        const frameData = ctx.getImageData(0, 0, boardSize, boardSize)
-        const frameArray = new Uint8Array(frameData.data)
-        
-        // Write frame to GIF
-        gif.writeFrame(frameArray, boardSize, boardSize, {
-          delay: frameDelay,
-          palette: palette,
-          first: moveIndex === 0 && step === 0
-        })
-      }
       
       // Execute the move to update board state
       const moveResult = chess.move(move)
       if (!moveResult) {
         console.error(`Failed to execute move: ${move.from}-${move.to}`)
+        continue
+      }
+      
+      // Draw the position after this move
+      const moveCanvas = document.createElement('canvas')
+      moveCanvas.width = boardSize
+      moveCanvas.height = boardSize
+      const moveCtx = moveCanvas.getContext('2d')
+      if (moveCtx) {
+        renderChessBoard(moveCtx, chess.fen(), boardSize)
+        ctx.drawImage(moveCanvas, currentX, 0)
+        currentX += boardSize
       }
     }
     
-    // Add a final frame showing the completed position
-    const finalCanvas = document.createElement('canvas')
-    finalCanvas.width = boardSize
-    finalCanvas.height = boardSize
-    const finalCtx = finalCanvas.getContext('2d')
-    if (finalCtx) {
-      renderChessBoard(finalCtx, chess.fen(), boardSize)
-      const finalFrameData = finalCtx.getImageData(0, 0, boardSize, boardSize)
-      const finalFrameArray = new Uint8Array(finalFrameData.data)
-      
-      gif.writeFrame(finalFrameArray, boardSize, boardSize, {
-        delay: frameDelay * 2, // Hold final position longer
-        palette: palette,
-        first: false
-      })
-    }
+    // Convert canvas to blob and then to array
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          blob.arrayBuffer().then(buffer => {
+            resolve(new Uint8Array(buffer))
+          }).catch(reject)
+        } else {
+          reject(new Error('Failed to create blob'))
+        }
+      }, 'image/png', 0.9)
+    })
     
-    // Finish the GIF
-    gif.finish()
-    const result = gif.bytes()
-    
-    console.log('Animated GIF encoding completed, size:', result.length, 'bytes')
-    return result
   } catch (error) {
     console.error('Error in generateAnimatedChessGif:', error)
     throw error
   }
 }
 
-export async function generateChessGif(
-  canvas: HTMLCanvasElement,
-  frameDelay: number = 1000,
-  quality: number = 10
+// Generate a simple static chess board image
+export async function generateChessBoardImage(
+  fen: string,
+  boardSize: number
 ): Promise<Uint8Array> {
-  // Get canvas context
-  const ctx = canvas.getContext('2d')
-  if (!ctx) {
-    throw new Error('Could not get canvas context')
+  try {
+    const canvas = document.createElement('canvas')
+    canvas.width = boardSize
+    canvas.height = boardSize
+    const ctx = canvas.getContext('2d')
+    
+    if (!ctx) {
+      throw new Error('Could not create canvas context')
+    }
+    
+    renderChessBoard(ctx, fen, boardSize)
+    
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          blob.arrayBuffer().then(buffer => {
+            resolve(new Uint8Array(buffer))
+          }).catch(reject)
+        } else {
+          reject(new Error('Failed to create blob'))
+        }
+      }, 'image/png', 0.9)
+    })
+    
+  } catch (error) {
+    console.error('Error in generateChessBoardImage:', error)
+    throw error
   }
-
-  // Get image data from canvas
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  
-  // Dynamically import gifenc only on client side
-  const { default: GIFEncoder } = await import('gifenc')
-  
-  // Create a simple palette for the chess board
-  const palette = [
-    [240, 217, 181], // Light square color
-    [181, 136, 99],  // Dark square color
-    [255, 255, 255], // White pieces
-    [0, 0, 0],       // Black pieces
-    [255, 255, 0],   // Highlight color
-  ]
-  
-  // Create GIF encoder
-  const gif = GIFEncoder()
-  
-  // Convert Uint8ClampedArray to Uint8Array
-  const frameData = new Uint8Array(imageData.data)
-  
-  // Write the frame
-  gif.writeFrame(frameData, canvas.width, canvas.height, {
-    delay: frameDelay,
-    palette: palette,
-    first: true
-  })
-  
-  gif.finish()
-  return gif.bytes()
 }
 
-export async function captureCanvasFrame(canvas: HTMLCanvasElement): Promise<ImageData> {
-  const ctx = canvas.getContext('2d')
-  if (!ctx) {
-    throw new Error('Could not get canvas context')
-  }
-  
-  return ctx.getImageData(0, 0, canvas.width, canvas.height)
-}
-
-export function downloadGif(gifData: Uint8Array, filename: string = 'chess-game.gif') {
-  const blob = new Blob([gifData], { type: 'image/gif' })
+// Download function for the generated image
+export function downloadImage(imageData: Uint8Array, filename: string = 'chess-sequence.png') {
+  const blob = new Blob([imageData], { type: 'image/png' })
   const url = URL.createObjectURL(blob)
   
   const link = document.createElement('a')
