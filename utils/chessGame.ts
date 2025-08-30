@@ -69,7 +69,16 @@ export class ChessGameManager {
         // Skip empty or invalid moves
         if (!move || move.trim() === '') continue
         
-        const result = this.chess.move(move)
+        // Handle pawn promotion automatically
+        let moveToExecute = move
+        if (this.isPawnPromotion(move)) {
+          // Auto-promote to queen if no promotion piece specified
+          if (!move.includes('=')) {
+            moveToExecute = move + '=Q'
+          }
+        }
+        
+        const result = this.chess.move(moveToExecute)
         if (!result) {
           console.warn(`Invalid move at position ${i + 1}: ${move}`)
           // Don't throw error, just return false
@@ -79,6 +88,38 @@ export class ChessGameManager {
       return true
     } catch (error) {
       console.error('Error loading moves:', error)
+      return false
+    }
+  }
+
+  // Check if a move is a pawn promotion
+  private isPawnPromotion(move: string): boolean {
+    // Check if it's a pawn move to the last rank
+    const lastRank = move.includes('8') || move.includes('1')
+    const isPawnMove = /^[a-h]?x?[a-h][18]/.test(move)
+    return lastRank && isPawnMove
+  }
+
+  // Get promotion options for a pawn move
+  getPromotionOptions(move: string): string[] {
+    if (!this.isPawnPromotion(move)) {
+      return []
+    }
+    return ['Q', 'R', 'B', 'N'] // Queen, Rook, Bishop, Knight
+  }
+
+  // Execute a move with specific promotion
+  executeMoveWithPromotion(move: string, promotionPiece: string = 'Q'): boolean {
+    try {
+      let moveToExecute = move
+      if (this.isPawnPromotion(move) && !move.includes('=')) {
+        moveToExecute = move + '=' + promotionPiece
+      }
+      
+      const result = this.chess.move(moveToExecute)
+      return !!result
+    } catch (error) {
+      console.error('Error executing move with promotion:', error)
       return false
     }
   }

@@ -15,6 +15,14 @@ export default function Home() {
   const [boardSize, setBoardSize] = useState(400)
   const [lastMove, setLastMove] = useState('')
   const [legalMoves, setLegalMoves] = useState<string[]>([])
+  const [showPromotion, setShowPromotion] = useState(false)
+  const [promotionMove, setPromotionMove] = useState('')
+  const [promotionOptions] = useState([
+    { piece: 'Q', symbol: '♕', name: 'Queen' },
+    { piece: 'R', symbol: '♖', name: 'Rook' },
+    { piece: 'B', symbol: '♗', name: 'Bishop' },
+    { piece: 'N', symbol: '♘', name: 'Knight' }
+  ])
   
   const chessGame = useRef(new ChessGameManager())
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -23,7 +31,8 @@ export default function Home() {
   const examples = {
     beginner: 'e4 e5 Nf3 Nc6',
     intermediate: 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7',
-    captures: 'e4 d5 exd5 Qxd5 Nc3 Qa5 d4 e6 Be3 Nf6 Nf3 Be7 Bd3 O-O O-O Nc6'
+    captures: 'e4 d5 exd5 Qxd5 Nc3 Qa5 d4 e6 Be3 Nf6 Nf3 Be7 Bd3 O-O O-O Nc6',
+    promotion: 'e4 d5 exd5 Qxd5 Nc3 Qa5 d4 e6 Be3 Nf6 Nf3 Be7 Bd3 O-O O-O Nc6 d5 exd5 cxd5 Qxd5 e5'
   }
 
   // Update board preview when settings change
@@ -56,11 +65,21 @@ export default function Home() {
   const handleMovesChange = useCallback((text: string) => {
     setMovesText(text)
     setError(null)
+    setShowPromotion(false) // Hide promotion UI when text changes
     
     if (text.trim()) {
       const moves = chessGame.current.parseMovesText(text)
       if (moves.length > 0) {
         try {
+          // Check if the last move is a pawn promotion
+          const lastMove = moves[moves.length - 1]
+          if (chessGame.current.isPawnPromotion(lastMove) && !lastMove.includes('=')) {
+            // Show promotion selection
+            setPromotionMove(lastMove)
+            setShowPromotion(true)
+            return // Don't execute the move yet
+          }
+          
           const success = chessGame.current.loadMoves(moves)
           if (success) {
             setCurrentFen(chessGame.current.getCurrentFen())
@@ -198,6 +217,18 @@ export default function Home() {
     handleMovesChange(exampleMoves)
   }, [handleMovesChange])
 
+  const handlePromotion = useCallback((promotionPiece: string) => {
+    if (promotionMove) {
+      const newMove = promotionMove + '=' + promotionPiece
+      const updatedMovesText = movesText.replace(promotionMove, newMove)
+      setMovesText(updatedMovesText)
+      setShowPromotion(false)
+      setPromotionMove('')
+      // Now process the updated moves
+      handleMovesChange(updatedMovesText)
+    }
+  }, [promotionMove, movesText, handleMovesChange])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
       <div className="max-w-6xl mx-auto">
@@ -257,6 +288,12 @@ export default function Home() {
                   Captures (16 moves)
                 </button>
                 <button
+                  onClick={() => handleExampleLoad('promotion')}
+                  className="px-3 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors text-sm"
+                >
+                  Promotion (20 moves)
+                </button>
+                <button
                   onClick={() => {
                     setMovesText('')
                     handleMovesChange('')
@@ -274,9 +311,34 @@ export default function Home() {
                   <div><strong>Pawn moves:</strong> e4, d5, exd5 (capture)</div>
                   <div><strong>Piece moves:</strong> Nf3, Bxe4 (capture), Qxd8+ (check)</div>
                   <div><strong>Castling:</strong> O-O (kingside), O-O-O (queenside)</div>
-                  <div><strong>Promotion:</strong> e8=Q (pawn promotes to queen)</div>
+                  <div><strong>Promotion:</strong> e8=Q (pawn promotes to queen), e8=R (rook), e8=B (bishop), e8=N (knight)</div>
+                  <div><strong>Auto-promotion:</strong> Just type e8 and choose your piece!</div>
                 </div>
               </div>
+
+              {/* Pawn Promotion Selection */}
+              {showPromotion && (
+                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                  <h4 className="text-sm font-medium text-yellow-800 mb-3">
+                    Pawn Promotion: Choose which piece to promote to
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {promotionOptions.map((option) => (
+                      <button
+                        key={option.piece}
+                        onClick={() => handlePromotion(option.piece)}
+                        className="flex items-center justify-center p-3 bg-white border border-yellow-300 rounded-lg hover:bg-yellow-100 transition-colors"
+                      >
+                        <span className="text-2xl mr-2">{option.symbol}</span>
+                        <span className="text-sm font-medium text-yellow-800">{option.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-yellow-600 mt-2">
+                    Move: {promotionMove} → Choose promotion piece
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Settings Section */}
