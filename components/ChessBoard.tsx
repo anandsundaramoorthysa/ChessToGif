@@ -7,6 +7,7 @@ interface ChessBoardProps {
   size?: number
   highlightLastMove?: boolean
   lastMove?: string
+  showCaptures?: boolean
 }
 
 const pieceSymbols: { [key: string]: string } = {
@@ -18,7 +19,8 @@ export default function ChessBoard({
   fen, 
   size = 400, 
   highlightLastMove = false,
-  lastMove = ''
+  lastMove = '',
+  showCaptures = true
 }: ChessBoardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -61,7 +63,14 @@ export default function ChessBoard({
 
             if ((file === fromFile && rank === fromRank) || 
                 (file === toFile && rank === toRank)) {
-              ctx.fillStyle = 'rgba(255, 255, 0, 0.5)'
+              // Different colors for from and to squares
+              if (file === fromFile && rank === fromRank) {
+                // From square - lighter highlight
+                ctx.fillStyle = 'rgba(255, 255, 0, 0.3)'
+              } else {
+                // To square - stronger highlight (might be a capture)
+                ctx.fillStyle = 'rgba(255, 255, 0, 0.6)'
+              }
               ctx.fillRect(x, y, squareSize, squareSize)
             }
           }

@@ -93,18 +93,10 @@ export class ChessGameManager {
       .replace(/\s+/g, ' ') // Normalize whitespace
       .trim()
 
-    // Split by spaces and filter out empty strings and incomplete moves
+    // Split by spaces and filter out empty strings
     const moves = cleanText.split(' ').filter(move => {
       const trimmedMove = move.trim()
-      // Only include moves that are at least 2 characters long and look like valid chess moves
-      return trimmedMove.length >= 2 && 
-             trimmedMove !== '' && 
-             // Match various chess move patterns:
-             // - Pawn moves: e4, e5, exd5, e8=Q
-             // - Piece moves: Nf3, Bxe4, Qxd8+
-             // - Castling: O-O, O-O-O
-             // - Basic coordinates: e4, d5
-             /^([KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](=[QRBN])?[+#]?|O-O(-O)?|[a-h][1-8])$/.test(trimmedMove)
+      return trimmedMove.length >= 2 && trimmedMove !== ''
     })
     
     return moves
@@ -137,6 +129,8 @@ export class ChessGameManager {
       const tempChess = new Chess()
       for (let i = 0; i < moves.length; i++) {
         const move = moves[i]
+        if (!move || move.trim() === '') continue
+        
         const result = tempChess.move(move)
         if (!result) {
           return { valid: false, error: `Invalid move at position ${i + 1}: ${move}` }
@@ -146,5 +140,61 @@ export class ChessGameManager {
     } catch (error) {
       return { valid: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
+  }
+
+  // Get all legal moves for current position
+  getLegalMoves(): string[] {
+    return this.chess.moves() as string[]
+  }
+
+  // Check if a specific move is legal
+  isMoveLegal(move: string): boolean {
+    const legalMoves = this.chess.moves() as string[]
+    return legalMoves.includes(move)
+  }
+
+  // Get detailed move information
+  getMoveDetails(move: string): any {
+    try {
+      const tempChess = new Chess(this.chess.fen())
+      return tempChess.move(move)
+    } catch {
+      return null
+    }
+  }
+
+  // Check if a square is occupied
+  isSquareOccupied(square: string): boolean {
+    return this.chess.get(square) !== null
+  }
+
+  // Get piece at a specific square
+  getPieceAt(square: string): any {
+    return this.chess.get(square)
+  }
+
+  // Check if it's check
+  isCheck(): boolean {
+    return this.chess.isCheck()
+  }
+
+  // Check if it's checkmate
+  isCheckmate(): boolean {
+    return this.chess.isCheckmate()
+  }
+
+  // Check if it's a draw
+  isDraw(): boolean {
+    return this.chess.isDraw()
+  }
+
+  // Get whose turn it is
+  getTurn(): 'w' | 'b' {
+    return this.chess.turn()
+  }
+
+  // Get move number
+  getMoveNumber(): number {
+    return this.chess.moveNumber()
   }
 }

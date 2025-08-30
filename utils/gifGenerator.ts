@@ -151,6 +151,7 @@ export async function generateAnimatedChessGif(
     ]
     
     console.log(`Creating animated GIF with ${moves.length} moves...`)
+    console.log('Moves:', moves)
     
     // Create GIF encoder
     const gif = GIFEncoder()
@@ -162,7 +163,7 @@ export async function generateAnimatedChessGif(
     // For each move, create animation frames
     for (let moveIndex = 0; moveIndex < moves.length; moveIndex++) {
       const move = moves[moveIndex]
-      console.log(`Animating move ${moveIndex + 1}/${moves.length}: ${move.from} to ${move.to}`)
+      console.log(`Animating move ${moveIndex + 1}/${moves.length}: ${move.from} to ${move.to} (${move.piece})`)
       
       // Get current FEN before the move
       const currentFen = chess.fen()
@@ -173,6 +174,9 @@ export async function generateAnimatedChessGif(
       const fromPixels = coordsToPixels(fromCoords.file, fromCoords.rank, squareSize)
       const toPixels = coordsToPixels(toCoords.file, toCoords.rank, squareSize)
       
+      console.log(`Move coordinates: from (${fromCoords.file},${fromCoords.rank}) to (${toCoords.file},${toCoords.rank})`)
+      console.log(`Pixel coordinates: from (${fromPixels.x},${fromPixels.y}) to (${toPixels.x},${toPixels.y})`)
+      
       // Create animation frames for this move
       for (let step = 0; step <= animationSteps; step++) {
         const progress = step / animationSteps
@@ -182,14 +186,20 @@ export async function generateAnimatedChessGif(
         canvas.width = boardSize
         canvas.height = boardSize
         const ctx = canvas.getContext('2d')
-        if (!ctx) continue
+        if (!ctx) {
+          console.error('Could not get canvas context for frame')
+          continue
+        }
         
         // Calculate current position of moving piece
         const currentPos = interpolatePosition(fromPixels, toPixels, progress)
         
+        // Get the correct piece symbol for the moving piece
+        const pieceSymbol = move.piece.toUpperCase() === move.piece ? move.piece : move.piece.toLowerCase()
+        
         // Render the board with the moving piece
         renderChessBoard(ctx, currentFen, boardSize, {
-          symbol: move.piece,
+          symbol: pieceSymbol,
           x: currentPos.x,
           y: currentPos.y,
           color: move.color
@@ -208,7 +218,10 @@ export async function generateAnimatedChessGif(
       }
       
       // Execute the move to update board state
-      chess.move(move)
+      const moveResult = chess.move(move)
+      if (!moveResult) {
+        console.error(`Failed to execute move: ${move.from}-${move.to}`)
+      }
     }
     
     // Add a final frame showing the completed position

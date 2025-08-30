@@ -14,6 +14,7 @@ export default function Home() {
   const [frameDelay, setFrameDelay] = useState(200)
   const [boardSize, setBoardSize] = useState(400)
   const [lastMove, setLastMove] = useState('')
+  const [legalMoves, setLegalMoves] = useState<string[]>([])
   
   const chessGame = useRef(new ChessGameManager())
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -21,7 +22,8 @@ export default function Home() {
   // Example moves with different complexity levels
   const examples = {
     beginner: 'e4 e5 Nf3 Nc6',
-    intermediate: 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7'
+    intermediate: 'e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7',
+    captures: 'e4 d5 exd5 Qxd5 Nc3 Qa5 d4 e6 Be3 Nf6 Nf3 Be7 Bd3 O-O O-O Nc6'
   }
 
   // Update board preview when settings change
@@ -38,7 +40,11 @@ export default function Home() {
             if (gameMoves.length > 0) {
               const lastGameMove = gameMoves[gameMoves.length - 1]
               setLastMove(`${lastGameMove.from}-${lastGameMove.to}`)
+            } else {
+              setLastMove('')
             }
+            // Update legal moves for current position
+            setLegalMoves(chessGame.current.getLegalMoves())
           }
         } catch (error) {
           console.log('Settings update error:', error)
@@ -66,8 +72,31 @@ export default function Home() {
             } else {
               setLastMove('')
             }
+            // Update legal moves for current position
+            setLegalMoves(chessGame.current.getLegalMoves())
           } else {
-            setError('Invalid moves detected')
+            // Try to identify which move failed
+            const tempChess = new (require('chess.js').Chess)()
+            let failedMove = ''
+            let failedIndex = 0
+            
+            for (let i = 0; i < moves.length; i++) {
+              const move = moves[i]
+              if (!move || move.trim() === '') continue
+              
+              const result = tempChess.move(move)
+              if (!result) {
+                failedMove = move
+                failedIndex = i + 1
+                break
+              }
+            }
+            
+            if (failedMove) {
+              setError(`Invalid move at position ${failedIndex}: "${failedMove}". This move is not legal in the current position.`)
+            } else {
+              setError('Invalid moves detected. Please check your chess notation.')
+            }
           }
         } catch (error) {
           // Don't show error for incomplete moves while typing
@@ -78,6 +107,7 @@ export default function Home() {
         chessGame.current.reset()
         setCurrentFen(chessGame.current.getCurrentFen())
         setLastMove('')
+        setLegalMoves(chessGame.current.getLegalMoves())
       }
     } else {
       chessGame.current.reset()
@@ -221,6 +251,12 @@ export default function Home() {
                   Intermediate (16 moves)
                 </button>
                 <button
+                  onClick={() => handleExampleLoad('captures')}
+                  className="px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm"
+                >
+                  Captures (16 moves)
+                </button>
+                <button
                   onClick={() => {
                     setMovesText('')
                     handleMovesChange('')
@@ -229,6 +265,17 @@ export default function Home() {
                 >
                   Clear
                 </button>
+              </div>
+
+              {/* Chess Notation Help */}
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="text-sm font-medium text-blue-800 mb-2">Chess Notation Help:</h4>
+                <div className="text-xs text-blue-700 space-y-1">
+                  <div><strong>Pawn moves:</strong> e4, d5, exd5 (capture)</div>
+                  <div><strong>Piece moves:</strong> Nf3, Bxe4 (capture), Qxd8+ (check)</div>
+                  <div><strong>Castling:</strong> O-O (kingside), O-O-O (queenside)</div>
+                  <div><strong>Promotion:</strong> e8=Q (pawn promotes to queen)</div>
+                </div>
               </div>
             </div>
 
@@ -291,7 +338,27 @@ export default function Home() {
               
               {error && (
                 <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                  {error}
+                  <div className="font-medium mb-2">Error: {error}</div>
+                  {legalMoves.length > 0 && (
+                    <div className="text-sm">
+                      <div className="font-medium text-red-600 mb-1">Available legal moves:</div>
+                      <div className="flex flex-wrap gap-1">
+                        {legalMoves.slice(0, 10).map((move, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-red-50 text-red-700 text-xs rounded border border-red-200"
+                          >
+                            {move}
+                          </span>
+                        ))}
+                        {legalMoves.length > 10 && (
+                          <span className="px-2 py-1 bg-red-50 text-red-600 text-xs rounded border border-red-200">
+                            +{legalMoves.length - 10} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -310,6 +377,88 @@ export default function Home() {
                   lastMove={lastMove}
                 />
               </div>
+              
+              {/* Legal Moves Display */}
+              {legalMoves.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    Legal moves ({legalMoves.length} available):
+                  </h3>
+                  <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+                    {legalMoves.slice(0, 20).map((move, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded border"
+                      >
+                        {move}
+                      </span>
+                    ))}
+                    {legalMoves.length > 20 && (
+                      <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded">
+                        +{legalMoves.length - 20} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Game State Information */}
+              <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Game State:</h3>
+                <div className="text-xs text-gray-600 space-y-1">
+                  <div><strong>Turn:</strong> {chessGame.current.getTurn() === 'w' ? 'White' : 'Black'}</div>
+                  <div><strong>Move:</strong> {Math.ceil(chessGame.current.getMoveNumber() / 2)}</div>
+                  {chessGame.current.isCheck() && (
+                    <div className="text-red-600 font-medium">CHECK!</div>
+                  )}
+                  {chessGame.current.isCheckmate() && (
+                    <div className="text-red-800 font-bold">CHECKMATE!</div>
+                  )}
+                  {chessGame.current.isDraw() && (
+                    <div className="text-orange-600 font-medium">DRAW!</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Captured Pieces Display */}
+              {(() => {
+                const gameMoves = chessGame.current.getMoves();
+                const capturedPieces = gameMoves
+                  .filter(move => move.captured)
+                  .map(move => ({
+                    piece: move.captured,
+                    color: move.color === 'w' ? 'black' : 'white',
+                    symbol: move.captured === 'p' ? '♙' : 
+                           move.captured === 'n' ? '♘' : 
+                           move.captured === 'b' ? '♗' : 
+                           move.captured === 'r' ? '♖' : 
+                           move.captured === 'q' ? '♕' : '♔'
+                  }));
+
+                if (capturedPieces.length > 0) {
+                  return (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <h3 className="text-sm font-medium text-red-700 mb-2">Captured Pieces:</h3>
+                      <div className="flex flex-wrap gap-1">
+                        {capturedPieces.map((piece, index) => (
+                          <span
+                            key={index}
+                            className={`px-2 py-1 text-sm rounded border ${
+                              piece.color === 'white' 
+                                ? 'bg-white text-black border-gray-300' 
+                                : 'bg-black text-white border-gray-600'
+                            }`}
+                            title={`Captured ${piece.color} ${piece.piece}`}
+                          >
+                            {piece.symbol}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
 
             {/* GIF Preview */}
