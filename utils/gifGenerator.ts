@@ -19,17 +19,32 @@ export async function generateChessGif(
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
   
   // Dynamically import gifenc only on client side
-  const { encodeGIF } = await import('gifenc')
+  const { default: GIFEncoder, quantize } = await import('gifenc')
   
-  // Create GIF encoder with proper data format
-  const gif = encodeGIF([new Uint8Array(imageData.data)], {
-    width: canvas.width,
-    height: canvas.height,
+  // Create a simple palette for the chess board
+  const palette = [
+    [240, 217, 181], // Light square color
+    [181, 136, 99],  // Dark square color
+    [255, 255, 255], // White pieces
+    [0, 0, 0],       // Black pieces
+    [255, 255, 0],   // Highlight color
+  ]
+  
+  // Create GIF encoder
+  const gif = GIFEncoder()
+  
+  // Convert Uint8ClampedArray to Uint8Array
+  const frameData = new Uint8Array(imageData.data)
+  
+  // Write the frame
+  gif.writeFrame(frameData, canvas.width, canvas.height, {
     delay: frameDelay,
-    quality: quality,
+    palette: palette,
+    first: true
   })
-
-  return gif
+  
+  gif.finish()
+  return gif.bytes()
 }
 
 export async function captureCanvasFrame(canvas: HTMLCanvasElement): Promise<ImageData> {
@@ -48,21 +63,51 @@ export async function generateGifFromFrames(
   delay: number = 1000, 
   quality: number = 10
 ): Promise<Uint8Array> {
-  // Dynamically import gifenc only on client side
-  const { encodeGIF } = await import('gifenc')
-  
-  // Convert ImageData to the format expected by gifenc
-  const frameData = frames.map(frame => {
-    // gifenc expects RGBA data as Uint8Array
-    return new Uint8Array(frame.data)
-  })
-  
-  return encodeGIF(frameData, {
-    width: width,
-    height: height,
-    delay: delay,
-    quality: quality,
-  })
+  try {
+    console.log('Importing gifenc library...')
+    // Dynamically import gifenc only on client side
+    const { default: GIFEncoder, quantize } = await import('gifenc')
+    console.log('gifenc library imported successfully')
+    
+    // Create a palette for the chess board colors
+    const palette = [
+      [240, 217, 181], // Light square color (#F0D9B5)
+      [181, 136, 99],  // Dark square color (#B58863)
+      [255, 255, 255], // White pieces
+      [0, 0, 0],       // Black pieces
+      [255, 255, 0],   // Highlight color (yellow)
+    ]
+    
+    console.log(`Creating GIF with ${frames.length} frames...`)
+    
+    // Create GIF encoder
+    const gif = GIFEncoder()
+    
+    // Write each frame
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i]
+      console.log(`Writing frame ${i + 1}/${frames.length}`)
+      
+      // Convert Uint8ClampedArray to Uint8Array
+      const frameData = new Uint8Array(frame.data)
+      
+      gif.writeFrame(frameData, width, height, {
+        delay: delay,
+        palette: palette,
+        first: i === 0 // Only first frame needs palette
+      })
+    }
+    
+    // Finish the GIF
+    gif.finish()
+    const result = gif.bytes()
+    
+    console.log('GIF encoding completed, size:', result.length, 'bytes')
+    return result
+  } catch (error) {
+    console.error('Error in generateGifFromFrames:', error)
+    throw error
+  }
 }
 
 export function downloadGif(gifData: Uint8Array, filename: string = 'chess-game.gif') {

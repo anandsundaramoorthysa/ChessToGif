@@ -15,6 +15,7 @@ export default function Home() {
   const [boardSize, setBoardSize] = useState(400)
   const [highlightLastMove, setHighlightLastMove] = useState(true)
   const [lastMove, setLastMove] = useState('')
+  const [status, setStatus] = useState('Ready')
   
   const chessGame = useRef(new ChessGameManager())
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -72,20 +73,28 @@ export default function Home() {
 
     setIsGenerating(true)
     setError(null)
+    setStatus('Starting...')
 
     try {
+      console.log('Starting GIF generation...')
+      setStatus('Parsing moves...')
+      
       const moves = chessGame.current.parseMovesText(movesText)
+      console.log('Parsed moves:', moves)
+      
       if (moves.length === 0) {
         throw new Error('No valid moves found')
       }
 
       // Validate moves first
+      setStatus('Validating moves...')
       const validation = chessGame.current.validateMoves(moves)
       if (!validation.valid) {
         throw new Error(validation.error || 'Invalid moves detected')
       }
 
       // Load moves and get all FENs
+      setStatus('Loading game state...')
       const success = chessGame.current.loadMoves(moves)
       if (!success) {
         throw new Error('Failed to load moves')
@@ -93,11 +102,14 @@ export default function Home() {
 
       const fens = chessGame.current.getAllFens()
       const gameMoves = chessGame.current.getMoves()
+      console.log(`Generating ${fens.length} frames...`)
+      setStatus(`Generating ${fens.length} frames...`)
 
       // Generate frames for each position
       const frames: ImageData[] = []
       
       for (let i = 0; i < fens.length; i++) {
+        setStatus(`Rendering frame ${i + 1}/${fens.length}...`)
         const fen = fens[i]
         const lastMove = i > 0 ? `${gameMoves[i - 1].from}-${gameMoves[i - 1].to}` : ''
         
@@ -106,7 +118,10 @@ export default function Home() {
         boardCanvas.width = boardSize
         boardCanvas.height = boardSize
         const boardCtx = boardCanvas.getContext('2d')
-        if (!boardCtx) continue
+        if (!boardCtx) {
+          console.warn(`Could not get context for frame ${i}`)
+          continue
+        }
 
         // Draw board
         const squareSize = boardSize / 8
@@ -198,16 +213,27 @@ export default function Home() {
         frames.push(frameData)
       }
 
+      console.log(`Generated ${frames.length} frames, creating GIF...`)
+      setStatus('Creating GIF...')
+
       // Generate GIF using the utility function
       const gif = await generateGifFromFrames(frames, boardSize, boardSize, frameDelay)
+      
+      console.log('GIF created successfully, size:', gif.length, 'bytes')
+      setStatus('Finalizing...')
       
       // Create preview URL
       const blob = new Blob([gif], { type: 'image/gif' })
       const url = URL.createObjectURL(blob)
       setGifUrl(url)
 
+      console.log('GIF generation completed successfully')
+      setStatus('Ready')
+
     } catch (err) {
+      console.error('GIF generation error:', err)
       setError(err instanceof Error ? err.message : 'Failed to generate GIF')
+      setStatus('Error occurred')
     } finally {
       setIsGenerating(false)
     }
@@ -246,9 +272,18 @@ export default function Home() {
               Chess <span className="text-chess-gold">To</span>Gif
             </h1>
           </div>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-600 text-lg mb-4">
             Create animated GIFs from chess moves
           </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto">
+            <h3 className="font-semibold text-blue-800 mb-2">How to use:</h3>
+            <ol className="text-sm text-blue-700 space-y-1">
+              <li>1. Enter chess moves in Standard Algebraic Notation (e.g., e4 e5 Nf3 Nc6)</li>
+              <li>2. Adjust settings like frame delay and board size if desired</li>
+              <li>3. Click "Generate GIF" to create an animated chess game</li>
+              <li>4. Download your GIF when ready</li>
+            </ol>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -348,6 +383,16 @@ export default function Home() {
               >
                 {isGenerating ? 'Generating GIF...' : 'Generate GIF'}
               </button>
+              
+              {/* Status Display */}
+              {isGenerating && (
+                <div className="mt-4 p-3 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-700 mr-2"></div>
+                    <span>{status}</span>
+                  </div>
+                </div>
+              )}
               
               {error && (
                 <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
