@@ -12,7 +12,7 @@
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18",
-    "chess.js": "^1.0.0-beta.6",
+    "chess.js": "^1.4.0",
     "gifenc": "^1.0.2"
   },
   "devDependencies": {

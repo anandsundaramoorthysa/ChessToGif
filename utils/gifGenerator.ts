@@ -1,5 +1,3 @@
-import { encodeGIF } from 'gifenc'
-
 export interface GifOptions {
   frameDelay?: number
   quality?: number
@@ -20,8 +18,11 @@ export async function generateChessGif(
   // Get image data from canvas
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
   
-  // Create GIF encoder
-  const gif = encodeGIF([imageData.data], {
+  // Dynamically import gifenc only on client side
+  const { encodeGIF } = await import('gifenc')
+  
+  // Create GIF encoder with proper data format
+  const gif = encodeGIF([new Uint8Array(imageData.data)], {
     width: canvas.width,
     height: canvas.height,
     delay: frameDelay,
@@ -38,6 +39,30 @@ export async function captureCanvasFrame(canvas: HTMLCanvasElement): Promise<Ima
   }
   
   return ctx.getImageData(0, 0, canvas.width, canvas.height)
+}
+
+export async function generateGifFromFrames(
+  frames: ImageData[], 
+  width: number, 
+  height: number, 
+  delay: number = 1000, 
+  quality: number = 10
+): Promise<Uint8Array> {
+  // Dynamically import gifenc only on client side
+  const { encodeGIF } = await import('gifenc')
+  
+  // Convert ImageData to the format expected by gifenc
+  const frameData = frames.map(frame => {
+    // gifenc expects RGBA data as Uint8Array
+    return new Uint8Array(frame.data)
+  })
+  
+  return encodeGIF(frameData, {
+    width: width,
+    height: height,
+    delay: delay,
+    quality: quality,
+  })
 }
 
 export function downloadGif(gifData: Uint8Array, filename: string = 'chess-game.gif') {

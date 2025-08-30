@@ -91,7 +91,7 @@ export class ChessGameManager {
     const moves = cleanText.split(' ').filter(move => {
       // Only include moves that are at least 2 characters long
       // This prevents single characters like 'e' from being treated as moves
-      return move.length >= 2
+      return move.length >= 2 && move.trim() !== ''
     })
     
     return moves
@@ -115,6 +115,23 @@ export class ChessGameManager {
       result: this.chess.isGameOver() ? this.chess.isCheckmate() ? 'checkmate' : 
               this.chess.isDraw() ? 'draw' : 
               this.chess.isStalemate() ? 'stalemate' : 'gameover' : undefined
+    }
+  }
+
+  // Helper method to validate a sequence of moves
+  validateMoves(moves: string[]): { valid: boolean; error?: string } {
+    try {
+      const tempChess = new Chess()
+      for (let i = 0; i < moves.length; i++) {
+        const move = moves[i]
+        const result = tempChess.move(move)
+        if (!result) {
+          return { valid: false, error: `Invalid move at position ${i + 1}: ${move}` }
+        }
+      }
+      return { valid: true }
+    } catch (error) {
+      return { valid: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   }
 }

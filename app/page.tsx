@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import ChessBoard from '@/components/ChessBoard'
 import { ChessGameManager } from '@/utils/chessGame'
-import { generateChessGif, downloadGif } from '@/utils/gifGenerator'
+import { generateGifFromFrames } from '@/utils/gifGenerator'
 
 export default function Home() {
   const [movesText, setMovesText] = useState('')
@@ -14,6 +14,7 @@ export default function Home() {
   const [frameDelay, setFrameDelay] = useState(1000)
   const [boardSize, setBoardSize] = useState(400)
   const [highlightLastMove, setHighlightLastMove] = useState(true)
+  const [lastMove, setLastMove] = useState('')
   
   const chessGame = useRef(new ChessGameManager())
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -29,6 +30,14 @@ export default function Home() {
           const success = chessGame.current.loadMoves(moves)
           if (success) {
             setCurrentFen(chessGame.current.getCurrentFen())
+            // Set last move for highlighting
+            const gameMoves = chessGame.current.getMoves()
+            if (gameMoves.length > 0) {
+              const lastGameMove = gameMoves[gameMoves.length - 1]
+              setLastMove(`${lastGameMove.from}-${lastGameMove.to}`)
+            } else {
+              setLastMove('')
+            }
           } else {
             setError('Invalid moves detected')
           }
@@ -40,14 +49,22 @@ export default function Home() {
         // Reset to initial position if no valid moves
         chessGame.current.reset()
         setCurrentFen(chessGame.current.getCurrentFen())
+        setLastMove('')
       }
     } else {
       chessGame.current.reset()
       setCurrentFen(chessGame.current.getCurrentFen())
+      setLastMove('')
     }
   }, [])
 
   const generateGif = useCallback(async () => {
+    // Ensure we're on the client side
+    if (typeof window === 'undefined') {
+      setError('GIF generation is only available in the browser')
+      return
+    }
+
     if (!movesText.trim()) {
       setError('Please enter some moves first')
       return
@@ -62,23 +79,20 @@ export default function Home() {
         throw new Error('No valid moves found')
       }
 
+      // Validate moves first
+      const validation = chessGame.current.validateMoves(moves)
+      if (!validation.valid) {
+        throw new Error(validation.error || 'Invalid moves detected')
+      }
+
       // Load moves and get all FENs
       const success = chessGame.current.loadMoves(moves)
       if (!success) {
-        throw new Error('Invalid moves detected')
+        throw new Error('Failed to load moves')
       }
 
       const fens = chessGame.current.getAllFens()
       const gameMoves = chessGame.current.getMoves()
-
-      // Create a temporary canvas for GIF generation
-      const tempCanvas = document.createElement('canvas')
-      tempCanvas.width = boardSize
-      tempCanvas.height = boardSize
-      const tempCtx = tempCanvas.getContext('2d')
-      if (!tempCtx) {
-        throw new Error('Could not create canvas context')
-      }
 
       // Generate frames for each position
       const frames: ImageData[] = []
@@ -184,8 +198,8 @@ export default function Home() {
         frames.push(frameData)
       }
 
-      // Generate GIF
-      const gif = await generateChessGifFromFrames(frames, frameDelay)
+      // Generate GIF using the utility function
+      const gif = await generateGifFromFrames(frames, boardSize, boardSize, frameDelay)
       
       // Create preview URL
       const blob = new Blob([gif], { type: 'image/gif' })
@@ -198,19 +212,6 @@ export default function Home() {
       setIsGenerating(false)
     }
   }, [movesText, frameDelay, boardSize, highlightLastMove])
-
-  const generateChessGifFromFrames = async (frames: ImageData[], delay: number): Promise<Uint8Array> => {
-    const { encodeGIF } = await import('gifenc')
-    
-    const frameData = frames.map(frame => frame.data)
-    
-    return encodeGIF(frameData, {
-      width: boardSize,
-      height: boardSize,
-      delay: delay,
-      quality: 10,
-    })
-  }
 
   const handleDownload = useCallback(() => {
     if (gifUrl) {
@@ -366,6 +367,7 @@ export default function Home() {
                   fen={currentFen}
                   size={boardSize}
                   highlightLastMove={highlightLastMove}
+                  lastMove={lastMove}
                 />
               </div>
             </div>
