@@ -119,7 +119,6 @@ export default function Home() {
           }
         } catch (error) {
           // Don't show error for incomplete moves while typing
-          console.log('Move parsing error (likely incomplete):', error)
         }
       } else {
         // Reset to initial position if no valid moves
@@ -151,11 +150,7 @@ export default function Home() {
     setError(null)
 
     try {
-      console.log('Starting animated GIF generation...')
-      console.log('Settings:', { frameDelay, boardSize })
-      
       const moves = chessGame.current.parseMovesText(movesText)
-      console.log('Parsed moves:', moves)
       
       if (moves.length === 0) {
         throw new Error('No valid moves found')
@@ -174,8 +169,6 @@ export default function Home() {
       }
 
       const gameMoves = chessGame.current.getMoves()
-      console.log(`Generating animated GIF for ${gameMoves.length} moves...`)
-      console.log('Game moves:', gameMoves)
 
       // Generate animated GIF with piece movements
       const gif = await generateAnimatedChessGif(
@@ -183,8 +176,6 @@ export default function Home() {
         boardSize, 
         frameDelay
       )
-      
-      console.log('Animated GIF created successfully, size:', gif.length, 'bytes')
       
       if (gif.length === 0) {
         throw new Error('Generated GIF is empty')
@@ -194,8 +185,6 @@ export default function Home() {
       const blob = new Blob([gif], { type: 'image/gif' })
       const url = URL.createObjectURL(blob)
       setGifUrl(url)
-
-      console.log('Animated GIF generation completed successfully')
 
     } catch (err) {
       console.error('GIF generation error:', err)

@@ -80,7 +80,6 @@ export class ChessGameManager {
         
         const result = this.chess.move(moveToExecute)
         if (!result) {
-          console.warn(`Invalid move at position ${i + 1}: ${move}`)
           // Don't throw error, just return false
           return false
         }

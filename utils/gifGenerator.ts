@@ -168,8 +168,6 @@ export async function generateAnimatedChessGif(
   frameDelay: number
 ): Promise<Uint8Array> {
   try {
-    console.log(`Creating animated GIF with ${moves.length} moves...`)
-    console.log('Moves:', moves)
     
     // Use fewer animation steps for better performance
     const animationSteps = 8
@@ -185,7 +183,7 @@ export async function generateAnimatedChessGif(
     const initialCanvas = document.createElement('canvas')
     initialCanvas.width = boardSize
     initialCanvas.height = boardSize
-    const initialCtx = initialCanvas.getContext('2d')
+    const initialCtx = initialCanvas.getContext('2d', { willReadFrequently: true })
     if (initialCtx) {
       renderChessBoard(initialCtx, chess.fen(), boardSize)
       const initialData = initialCtx.getImageData(0, 0, boardSize, boardSize)
@@ -195,7 +193,6 @@ export async function generateAnimatedChessGif(
     // For each move, create animation frames
     for (let moveIndex = 0; moveIndex < moves.length; moveIndex++) {
       const move = moves[moveIndex]
-      console.log(`Animating move ${moveIndex + 1}/${moves.length}: ${move.from} to ${move.to} (${move.piece})`)
       
       // Get current FEN before the move
       const currentFen = chess.fen()
@@ -214,7 +211,7 @@ export async function generateAnimatedChessGif(
         const canvas = document.createElement('canvas')
         canvas.width = boardSize
         canvas.height = boardSize
-        const ctx = canvas.getContext('2d')
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
         if (!ctx) {
           console.error('Could not get canvas context for frame')
           continue
@@ -250,7 +247,7 @@ export async function generateAnimatedChessGif(
     const finalCanvas = document.createElement('canvas')
     finalCanvas.width = boardSize
     finalCanvas.height = boardSize
-    const finalCtx = finalCanvas.getContext('2d')
+    const finalCtx = finalCanvas.getContext('2d', { willReadFrequently: true })
     if (finalCtx) {
       renderChessBoard(finalCtx, chess.fen(), boardSize)
       const finalFrameData = finalCtx.getImageData(0, 0, boardSize, boardSize)
@@ -260,7 +257,6 @@ export async function generateAnimatedChessGif(
     // Convert frames to GIF using a working approach
     const gifData = await framesToGif(frames, boardSize, boardSize, frameDelay)
     
-    console.log('Animated GIF encoding completed, size:', gifData.length, 'bytes')
     return gifData
     
   } catch (error) {
@@ -322,90 +318,157 @@ export function downloadImage(imageData: Uint8Array, filename: string = 'chess-s
 // Convert frames to GIF using a working method
 async function framesToGif(frames: ImageData[], width: number, height: number, delay: number): Promise<Uint8Array> {
   try {
-    // Try to use gif.js library if available, otherwise fall back to a different approach
+    // Try gif.js first
     const gifData = await createGifWithGifJs(frames, width, height, delay)
     return gifData
   } catch (error) {
-    console.log('GIF.js not available, using alternative method:', error)
-    // Fallback: create a simple animated sequence
-    return await createSimpleAnimatedSequence(frames, width, height, delay)
-  }
-}
-
-// Try to use gif.js library for proper GIF generation
-async function createGifWithGifJs(frames: ImageData[], width: number, height: number, delay: number): Promise<Uint8Array> {
-  // Dynamic import of gif.js
-  const GIF = await import('gif.js')
-  
-  return new Promise((resolve, reject) => {
-    const gif = new GIF({
-      workers: 2,
-      quality: 10,
-      width: width,
-      height: height,
-      workerScript: '/gif.worker.js' // You might need to add this file
-    })
-    
-    // Add frames
-    frames.forEach((frame, index) => {
-      const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
-      const ctx = canvas.getContext('2d')
-      if (ctx) {
-        ctx.putImageData(frame, 0, 0)
-        gif.addFrame(canvas, { delay: delay })
-      }
-    })
-    
-    gif.on('finished', (blob: Blob) => {
-      blob.arrayBuffer().then(buffer => {
-        resolve(new Uint8Array(buffer))
-      }).catch(reject)
-    })
-    
-    gif.render()
-  })
-}
-
-// Fallback method: create a simple animated sequence
-async function createSimpleAnimatedSequence(frames: ImageData[], width: number, height: number, delay: number): Promise<Uint8Array> {
-  // Create a canvas that shows all frames in sequence
-  const canvas = document.createElement('canvas')
-  canvas.width = width * frames.length
-  canvas.height = height
-  const ctx = canvas.getContext('2d')
-  
-  if (!ctx) {
-    throw new Error('Could not create canvas context')
-  }
-  
-  // Fill background
-  ctx.fillStyle = '#FFFFFF'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-  
-  // Draw all frames horizontally
-  frames.forEach((frame, index) => {
-    const tempCanvas = document.createElement('canvas')
-    tempCanvas.width = width
-    tempCanvas.height = height
-    const tempCtx = tempCanvas.getContext('2d')
-    if (tempCtx) {
-      tempCtx.putImageData(frame, 0, 0)
-      ctx.drawImage(tempCanvas, index * width, 0)
+    console.error('gif.js failed, trying gifenc:', error)
+    // Try gifenc as fallback
+    try {
+      const gifData = await createGifWithGifenc(frames, width, height, delay)
+      return gifData
+    } catch (gifencError) {
+      console.error('gifenc also failed:', gifencError)
+      throw new Error('Failed to generate animated GIF - both gif.js and gifenc failed')
     }
-  })
-  
-  // Convert to blob and then to array
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) {
-        blob.arrayBuffer().then(buffer => {
-          resolve(new Uint8Array(buffer))
-        }).catch(reject)
-      } else {
-        reject(new Error('Failed to create blob'))
-      }
-    }, 'image/png', 0.9)
-  })
+  }
 }
+
+// Create GIF using gif.js library
+async function createGifWithGifJs(frames: ImageData[], width: number, height: number, delay: number): Promise<Uint8Array> {
+  try {
+    // Import gif.js library
+    const GIF = (await import('gif.js')).default
+    
+    return new Promise((resolve, reject) => {
+      // Add timeout to prevent hanging
+      const timeout = setTimeout(() => {
+        reject(new Error('GIF generation timed out after 15 seconds'))
+      }, 15000)
+      
+      let isCompleted = false
+      
+      const complete = (result: Uint8Array) => {
+        if (!isCompleted) {
+          isCompleted = true
+          clearTimeout(timeout)
+          resolve(result)
+        }
+      }
+      
+      const fail = (error: Error) => {
+        if (!isCompleted) {
+          isCompleted = true
+          clearTimeout(timeout)
+          reject(error)
+        }
+      }
+      // Create GIF instance with simpler configuration
+      const gif = new GIF({
+        workers: 0, // No workers to avoid timeout issues
+        quality: 10,
+        width: width,
+        height: height,
+        workerScript: undefined,
+        dither: false, // Disable dithering for better performance
+        transparent: null, // No transparency
+        background: '#FFFFFF' // White background
+      })
+      
+      // Add frames to GIF
+      frames.forEach((frame, index) => {
+        // Create a canvas for each frame
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
+        
+        if (ctx) {
+          // Put the frame data on the canvas
+          ctx.putImageData(frame, 0, 0)
+          
+          // Add the canvas as a frame to the GIF
+          gif.addFrame(canvas, { delay: delay })
+        }
+      })
+      
+      // Handle GIF completion
+      gif.on('finished', (blob: Blob) => {
+        // Convert blob to Uint8Array
+        blob.arrayBuffer().then(buffer => {
+          const gifData = new Uint8Array(buffer)
+          complete(gifData)
+        }).catch(fail)
+      })
+      
+      // Start rendering the GIF
+      gif.render()
+    })
+    
+  } catch (error) {
+    console.error('Error creating GIF with gif.js:', error)
+    throw error
+  }
+}
+
+// Create GIF using gifenc library as fallback
+async function createGifWithGifenc(frames: ImageData[], width: number, height: number, delay: number): Promise<Uint8Array> {
+  try {
+    // Import gifenc library
+    const gifenc = await import('gifenc')
+    
+    // Create GIF encoder
+    const gif = gifenc.GIFEncoder()
+    
+    // Create a global palette from the first frame
+    const firstFrame = frames[0]
+    const imageData = firstFrame.data
+    const rgbaData = new Uint8Array(imageData.length)
+    
+    // Copy and convert the data
+    for (let j = 0; j < imageData.length; j++) {
+      rgbaData[j] = imageData[j]
+    }
+    
+    // Create global palette from first frame
+    const globalPalette = gifenc.quantize(rgbaData, 256)
+    
+    // Process each frame
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i]
+      
+      // Convert ImageData to proper format for gifenc
+      const frameImageData = frame.data
+      const frameRgbaData = new Uint8Array(frameImageData.length)
+      
+      // Copy and convert the data
+      for (let j = 0; j < frameImageData.length; j++) {
+        frameRgbaData[j] = frameImageData[j]
+      }
+      
+      // Apply global palette to get indexed data
+      const indexedData = gifenc.applyPalette(frameRgbaData, globalPalette, 'rgb565')
+      
+      // Add frame to GIF with proper options
+      gif.writeFrame(indexedData, width, height, {
+        delay: delay,
+        transparent: false,
+        first: i === 0,
+        palette: i === 0 ? globalPalette : undefined // Include palette only for first frame
+      })
+    }
+    
+    // Finish the GIF
+    gif.finish()
+    
+    // Get the GIF data
+    const gifBytes = gif.bytes()
+    
+    return gifBytes
+    
+  } catch (error) {
+    console.error('Error creating GIF with gifenc:', error)
+    throw error
+  }
+}
+
