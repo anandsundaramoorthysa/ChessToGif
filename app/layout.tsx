@@ -5,10 +5,12 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Chess Move GIF Maker',
-  description: 'Create animated GIFs from chess moves',
+  title: 'ChessToGif',
+  description: 'Create beautiful animated GIFs from chess moves and games',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/ChessToGIf.png',
+    shortcut: '/ChessToGIf.png',
+    apple: '/ChessToGIf.png',
   },
 }
 

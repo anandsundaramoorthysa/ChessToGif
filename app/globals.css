@@ -6,6 +6,29 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  
+  /* Custom CSS Variables for enhanced theming */
+  --chess-primary: #D4AF37;
+  --chess-primary-dark: #B8941F;
+  --chess-secondary: #2C3E50;
+  --chess-accent: #E74C3C;
+  --chess-success: #27AE60;
+  --chess-info: #3498DB;
+  --chess-warning: #F39C12;
+  
+  /* Enhanced gradients */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --gradient-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,34 +49,157 @@ body {
     rgb(var(--background-start-rgb));
 }
 
-/* Custom slider styling */
+/* Enhanced background with animated gradient */
+.animated-gradient {
+  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.glass-dark {
+  background: rgba(44, 62, 80, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(44, 62, 80, 0.18);
+}
+
+/* Enhanced button animations */
+.btn-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Floating animation for elements */
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Pulse animation */
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+  to { box-shadow: 0 0 30px rgba(212, 175, 55, 0.8); }
+}
+
+/* Enhanced slider styling */
 .slider::-webkit-slider-thumb {
   appearance: none;
-  height: 20px;
-  width: 20px;
+  height: 24px;
+  width: 24px;
   border-radius: 50%;
-  background: #D4AF37;
+  background: linear-gradient(135deg, var(--chess-primary), var(--chess-primary-dark));
   cursor: pointer;
-  border: 2px solid #2C3E50;
+  border: 3px solid var(--chess-secondary);
+  box-shadow: var(--shadow-lg);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-xl);
 }
 
 .slider::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
+  height: 24px;
+  width: 24px;
   border-radius: 50%;
-  background: #D4AF37;
+  background: linear-gradient(135deg, var(--chess-primary), var(--chess-primary-dark));
   cursor: pointer;
-  border: 2px solid #2C3E50;
+  border: 3px solid var(--chess-secondary);
+  box-shadow: var(--shadow-lg);
+  transition: all 0.2s ease;
 }
 
 .slider::-webkit-slider-track {
-  background: #e5e7eb;
-  border-radius: 0.5rem;
-  height: 8px;
+  background: linear-gradient(90deg, #e5e7eb, #d1d5db);
+  border-radius: 0.75rem;
+  height: 10px;
+  box-shadow: var(--shadow-sm);
 }
 
 .slider::-moz-range-track {
-  background: #e5e7eb;
-  border-radius: 0.5rem;
-  height: 8px;
+  background: linear-gradient(90deg, #e5e7eb, #d1d5db);
+  border-radius: 0.75rem;
+  height: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--chess-primary), var(--chess-primary-dark));
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--chess-primary-dark), var(--chess-primary));
+}
+
+/* Enhanced focus states */
+.focus-ring:focus {
+  outline: none;
+  ring: 3px;
+  ring-color: var(--chess-primary);
+  ring-offset: 2px;
+}
+
+/* Text gradient effects */
+.text-gradient {
+  background: linear-gradient(135deg, var(--chess-primary), var(--chess-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-2xl);
+}
+
+/* Loading spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

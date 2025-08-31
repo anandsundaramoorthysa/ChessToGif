@@ -1,5 +1,4 @@
 export interface GifOptions {
-  frameDelay?: number
   quality?: number
   boardSize?: number
 }
@@ -44,11 +43,11 @@ function renderChessBoard(
 ): void {
   const squareSize = boardSize / 8
   const pieceSymbols: { [key: string]: string } = {
-    'k': '♔', 'q': '♕', 'r': '♖', 'b': '♗', 'n': '♘', 'p': '♙',
-    'K': '♚', 'Q': '♛', 'R': '♜', 'B': '♝', 'N': '♞', 'P': '♟'
+    'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟',
+    'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙'
   }
-
-  // Clear the entire canvas first
+  
+    // Clear the entire canvas first
   ctx.fillStyle = '#FFFFFF'
   ctx.fillRect(0, 0, boardSize, boardSize)
 
@@ -83,9 +82,19 @@ function renderChessBoard(
         if (!movingPiece || char !== movingPiece.symbol) {
           // Enhanced piece rendering for better visibility
           const isWhite = char === char.toUpperCase()
-          ctx.fillStyle = isWhite ? '#FFFFFF' : '#000000'
-          ctx.strokeStyle = isWhite ? '#000000' : '#FFFFFF'
-          ctx.lineWidth = 3
+          
+          // Better contrast for black pieces
+          if (isWhite) {
+            ctx.fillStyle = '#FFFFFF'
+            ctx.strokeStyle = '#000000'
+            ctx.lineWidth = 3
+          } else {
+            // Make black pieces much more visible with solid black fill and white outline
+            ctx.fillStyle = '#000000'  // Solid black fill for black pieces
+            ctx.strokeStyle = '#FFFFFF' // White outline for contrast
+            ctx.lineWidth = 4  // Thick white outline
+          }
+          
           ctx.font = `bold ${Math.floor(squareSize * 0.7)}px Arial`
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
@@ -93,10 +102,18 @@ function renderChessBoard(
           const pieceSymbol = pieceSymbols[char] || char
           
           // Add shadow for better visibility
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
-          ctx.shadowBlur = 2
-          ctx.shadowOffsetX = 1
-          ctx.shadowOffsetY = 1
+          if (isWhite) {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
+            ctx.shadowBlur = 2
+            ctx.shadowOffsetX = 1
+            ctx.shadowOffsetY = 1
+          } else {
+            // Strong shadow for black pieces to ensure visibility
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'
+            ctx.shadowBlur = 6
+            ctx.shadowOffsetX = 2
+            ctx.shadowOffsetY = 2
+          }
           
           ctx.strokeText(pieceSymbol, x + squareSize / 2, y + squareSize / 2)
           ctx.fillText(pieceSymbol, x + squareSize / 2, y + squareSize / 2)
@@ -164,17 +181,16 @@ function renderChessBoard(
 // Create animated chess GIF showing piece movements
 export async function generateAnimatedChessGif(
   moves: ChessMove[],
-  boardSize: number,
-  frameDelay: number
+  boardSize: number
 ): Promise<Uint8Array> {
   try {
     
     // Use fewer animation steps for better performance
     const animationSteps = 8
     
-    // Initialize chess game
+    // Initialize chess game with starting position
     const { Chess } = await import('chess.js')
-    const chess = new Chess()
+    const chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
     
     // Create frames array to store all animation frames
     const frames: ImageData[] = []
@@ -255,7 +271,7 @@ export async function generateAnimatedChessGif(
     }
     
     // Convert frames to GIF using a working approach
-    const gifData = await framesToGif(frames, boardSize, boardSize, frameDelay)
+    const gifData = await framesToGif(frames, boardSize, boardSize, 200)
     
     return gifData
     

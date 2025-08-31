@@ -6,6 +6,7 @@ export interface Move {
   piece: string
   color: 'w' | 'b'
   san?: string
+  captured?: string
 }
 
 export interface GameState {
@@ -61,7 +62,7 @@ export class ChessGameManager {
     }
   }
 
-  loadMoves(moves: string[]): boolean {
+    loadMoves(moves: string[]): boolean {
     try {
       this.chess = new Chess()
       for (let i = 0; i < moves.length; i++) {
@@ -69,16 +70,7 @@ export class ChessGameManager {
         // Skip empty or invalid moves
         if (!move || move.trim() === '') continue
         
-        // Handle pawn promotion automatically
-        let moveToExecute = move
-        if (this.isPawnPromotion(move)) {
-          // Auto-promote to queen if no promotion piece specified
-          if (!move.includes('=')) {
-            moveToExecute = move + '=Q'
-          }
-        }
-        
-        const result = this.chess.move(moveToExecute)
+        const result = this.chess.move(move)
         if (!result) {
           // Don't throw error, just return false
           return false
@@ -92,7 +84,7 @@ export class ChessGameManager {
   }
 
   // Check if a move is a pawn promotion
-  private isPawnPromotion(move: string): boolean {
+  isPawnPromotion(move: string): boolean {
     // Check if it's a pawn move to the last rank
     const lastRank = move.includes('8') || move.includes('1')
     const isPawnMove = /^[a-h]?x?[a-h][18]/.test(move)
@@ -122,6 +114,8 @@ export class ChessGameManager {
       return false
     }
   }
+
+
 
   parseMovesText(text: string): string[] {
     // Remove comments, annotations, and extra whitespace

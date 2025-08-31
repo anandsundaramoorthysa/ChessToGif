@@ -7,6 +7,7 @@ declare module 'chess.js' {
     san?: string;
     flags?: string;
     promotion?: string;
+    captured?: string;
   }
 
   export interface GameState {

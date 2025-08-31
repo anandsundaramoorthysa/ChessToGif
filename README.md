@@ -1,4 +1,4 @@
-# Chess Move GIF Maker
+# ChessToGif
 
 A fully functional Next.js application that allows users to input chess moves and generate animated GIFs of chess games. The app runs entirely in the browser (client-side) and provides a beautiful, modern interface for creating chess animations.
 
@@ -33,7 +33,7 @@ A fully functional Next.js application that allows users to input chess moves an
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd chess-move-gif-maker
+cd chesstogif
 ```
 
 2. Install dependencies:
@@ -96,7 +96,7 @@ d4 d5 c4 e6 Nc3 Nf6 Bg5 Be7 e3 O-O Nf3 h6 Bh4 b6
 ## Project Structure
 
 ```
-chess-move-gif-maker/
+chesstogif/
 ├── app/
 │   ├── globals.css          # Global styles with Tailwind
 │   ├── layout.tsx           # Root layout component
