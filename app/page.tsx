@@ -196,8 +196,8 @@ export default function Home() {
         throw new Error('Generated GIF is empty')
       }
       
-      // Create preview URL
-      const blob = new Blob([gif], { type: 'image/gif' })
+      // Create preview URL - fix type compatibility issue
+      const blob = new Blob([gif as BlobPart], { type: 'image/gif' })
       const url = URL.createObjectURL(blob)
       setGifUrl(url)
 

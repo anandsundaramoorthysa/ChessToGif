@@ -318,7 +318,7 @@ export async function generateChessBoardImage(
 
 // Download function for the generated image
 export function downloadImage(imageData: Uint8Array, filename: string = 'chess-sequence.png') {
-  const blob = new Blob([imageData], { type: 'image/png' })
+  const blob = new Blob([imageData as BlobPart], { type: 'image/png' })
   const url = URL.createObjectURL(blob)
   
   const link = document.createElement('a')
