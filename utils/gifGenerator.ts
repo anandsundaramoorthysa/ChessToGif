@@ -331,23 +331,10 @@ export function downloadImage(imageData: Uint8Array, filename: string = 'chess-s
   URL.revokeObjectURL(url)
 }
 
-// Convert frames to GIF using a working method
+// Convert frames to GIF using gifenc (more reliable in browser/bundled environments)
 async function framesToGif(frames: ImageData[], width: number, height: number, delay: number): Promise<Uint8Array> {
-  try {
-    // Try gif.js first
-    const gifData = await createGifWithGifJs(frames, width, height, delay)
-    return gifData
-  } catch (error) {
-    console.error('gif.js failed, trying gifenc:', error)
-    // Try gifenc as fallback
-    try {
-      const gifData = await createGifWithGifenc(frames, width, height, delay)
-      return gifData
-    } catch (gifencError) {
-      console.error('gifenc also failed:', gifencError)
-      throw new Error('Failed to generate animated GIF - both gif.js and gifenc failed')
-    }
-  }
+  // Directly use gifenc to avoid worker/script path issues from gif.js
+  return await createGifWithGifenc(frames, width, height, delay)
 }
 
 // Create GIF using gif.js library
