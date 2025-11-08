@@ -135,5 +135,5 @@ This project is open source and available under the **MIT License**.
 
 If you have any questions, feedback, or suggestions, feel free to reach out to the author:
 
-**ANAND SUNDARAMOORTHY SA**
+**ANAND SUNDARAMOORTHY SA:**
 📧 [sanand03072005@gmail.com](mailto:sanand03072005@gmail.com?subject=Question%20about%20ChessToGif%20Project&body=Dear%20Author%2C%0A%0AI%20have%20a%20question%20regarding%20the%20ChessToGif%20project%2E%0A%0A%5BYour%20Question%20Here%5D%0A%0AThank%20you%21%0A%5BYour%20Name%5D)
