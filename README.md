@@ -39,7 +39,7 @@ It provides a **modern, responsive interface** and runs **entirely client-side**
    ```bash
    git clone <repository-url>
    cd chesstogif
-````
+   ````
 
 2. **Install dependencies**
 
