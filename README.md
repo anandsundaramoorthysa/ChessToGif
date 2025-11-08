@@ -11,12 +11,12 @@
 8. [License](#license)  
 9. [Contact Me](#contact-me)  
 
-## 🏗️ About Project {#about-project}
+## About Project
 
 **ChessToGif** is a fully functional **Next.js** application that allows users to input chess moves and generate animated GIFs of chess games — all within the browser.  
 It provides a **modern, responsive interface** and runs **entirely client-side**, requiring no backend setup.  
 
-## 🌐 Live Demo {#live-demo}
+## Live Demo
 
 🚀 **Try it here:** [https://chesstogif.anandsundaramoorthy.com](https://chesstogif.anandsundaramoorthy.com)
 
@@ -28,7 +28,7 @@ It provides a **modern, responsive interface** and runs **entirely client-side**
 - **gifenc** – GIF encoding library for animations  
 - **HTML Canvas** – For rendering the chess board  
 
-## ⚙️ Installation {#installation}
+## Installation
 
 ### 🧾 Prerequisites  
 - Node.js 
@@ -55,7 +55,7 @@ It provides a **modern, responsive interface** and runs **entirely client-side**
 
    Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 🚀 Use/Run the Project {#userun-the-project}
+## Use/Run the Project
 
 1. **Enter Chess Moves**
 
@@ -103,7 +103,7 @@ e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Be3 e5 Nb3 Be6 f3 Be7 Qd2 O-O O-O-O Nbd7
 d4 d5 c4 e6 Nc3 Nf6 Bg5 Be7 e3 O-O Nf3 h6 Bh4 b6
 ```
 
-## 🌟 Features {#features}
+## Features
 
 * ✅ **Chess Move Input** – Supports both PGN and SAN formats
 * ♟️ **Real-time Board Preview** – Instantly updates the board
@@ -113,7 +113,7 @@ d4 d5 c4 e6 Nc3 Nf6 Bg5 Be7 e3 O-O Nf3 h6 Bh4 b6
 * 🖥️ **Modern UI** – Clean and responsive with Tailwind CSS
 * 🌐 **Client-side Only** – No backend required
 
-## 🤝 Contributing {#contributing}
+## Contributing
 
 Contributions to this project are welcome! 🎉  
 If you find any bugs, have suggestions for improvements, or would like to add new features, please follow the steps below:  
@@ -155,17 +155,17 @@ If you find any bugs, have suggestions for improvements, or would like to add ne
    Go to your forked repository on GitHub and click on **"Compare & pull request"**.
    Provide a clear description of your changes and submit your pull request for review.
 
-## 👨‍💻 Contributors {#contributors}
+## Contributors
 
 <a href="https://github.com/anandsundaramoorthysa/ChessToGif/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=anandsundaramoorthysa/ChessToGif" />
 </a>
 
-## 🪪 License {#license}
+## License
 
 This project is open source and available under the **MIT License**.
 
-## 📬 Contact Me {#contact-me}
+## Contact Me
 
 If you have any questions, feedback, or suggestions, feel free to reach out to the author:
 
