@@ -11,12 +11,12 @@
 8. [License](#license)  
 9. [Contact Me](#contact-me)  
 
-## 🏗️ About Project  
+## 🏗️ About Project {#about-project}
 
 **ChessToGif** is a fully functional **Next.js** application that allows users to input chess moves and generate animated GIFs of chess games — all within the browser.  
 It provides a **modern, responsive interface** and runs **entirely client-side**, requiring no backend setup.  
 
-## 🌐 Live Demo  
+## 🌐 Live Demo {#live-demo}
 
 🚀 **Try it here:** [https://chesstogif.anandsundaramoorthy.com](https://chesstogif.anandsundaramoorthy.com)
 
@@ -28,7 +28,7 @@ It provides a **modern, responsive interface** and runs **entirely client-side**
 - **gifenc** – GIF encoding library for animations  
 - **HTML Canvas** – For rendering the chess board  
 
-## ⚙️ Installation  
+## ⚙️ Installation {#installation}
 
 ### 🧾 Prerequisites  
 - Node.js 
@@ -55,7 +55,7 @@ It provides a **modern, responsive interface** and runs **entirely client-side**
 
    Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 🚀 Use/Run the Project
+## 🚀 Use/Run the Project {#userun-the-project}
 
 1. **Enter Chess Moves**
 
@@ -103,7 +103,7 @@ e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Be3 e5 Nb3 Be6 f3 Be7 Qd2 O-O O-O-O Nbd7
 d4 d5 c4 e6 Nc3 Nf6 Bg5 Be7 e3 O-O Nf3 h6 Bh4 b6
 ```
 
-## 🌟 Features
+## 🌟 Features {#features}
 
 * ✅ **Chess Move Input** – Supports both PGN and SAN formats
 * ♟️ **Real-time Board Preview** – Instantly updates the board
@@ -113,25 +113,59 @@ d4 d5 c4 e6 Nc3 Nf6 Bg5 Be7 e3 O-O Nf3 h6 Bh4 b6
 * 🖥️ **Modern UI** – Clean and responsive with Tailwind CSS
 * 🌐 **Client-side Only** – No backend required
 
-## 🤝 Contributing
+## 🤝 Contributing {#contributing}
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a Pull Request
+Contributions to this project are welcome! 🎉  
+If you find any bugs, have suggestions for improvements, or would like to add new features, please follow the steps below:  
 
-## 👨‍💻 Contributors
+### 🪜 Steps to Contribute  
+
+1. **Fork the Repository**  
+   Fork this repository to your own GitHub account:  
+   👉 [ChessToGif Repository](https://github.com/anandsundaramoorthysa/ChessToGif)
+
+2. **Clone the Forked Repository**  
+   ```bash
+   git clone https://github.com/your-username/ChessToGif.git
+   cd ChessToGif
+   ```
+
+3. **Create a New Branch**
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+4. **Make Your Changes**
+   Implement your desired changes and ensure the code follows best practices and is well-documented.
+
+5. **Commit Your Changes**
+
+   ```bash
+   git commit -m "Add your feature or fix"
+   ```
+
+6. **Push to Your Forked Repository**
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+7. **Submit a Pull Request**
+   Go to your forked repository on GitHub and click on **"Compare & pull request"**.
+   Provide a clear description of your changes and submit your pull request for review.
+
+## 👨‍💻 Contributors {#contributors}
 
 <a href="https://github.com/anandsundaramoorthysa/ChessToGif/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=anandsundaramoorthysa/ChessToGif" />
 </a>
 
-## 🪪 License
+## 🪪 License {#license}
 
 This project is open source and available under the **MIT License**.
 
-## 📬 Contact Me
+## 📬 Contact Me {#contact-me}
 
 If you have any questions, feedback, or suggestions, feel free to reach out to the author:
 
