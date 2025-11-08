@@ -1,184 +1,150 @@
-# ChessToGif
+# 🧩 ChessToGif  
 
-A fully functional Next.js application that allows users to input chess moves and generate animated GIFs of chess games. The app runs entirely in the browser (client-side) and provides a beautiful, modern interface for creating chess animations.
+## 📑 Table of Contents  
+1. [About Project](#about-project)
+2. [Live Demo](#live-demo)  
+3. [Installation](#installation)  
+4. [Use/Run the Project](#userun-the-project)  
+5. [Features](#features)  
+6. [Contributing](#contributing)  
+7. [Contributors](#contributors)  
+8. [License](#license)  
+9. [Contact Me](#contact-me)  
 
-## Features
+## 🏗️ About Project  
 
-- **Chess Move Input**: Support for PGN and SAN format chess moves
-- **Real-time Board Preview**: See the current position as you type moves
-- **Animated GIF Generation**: Create smooth animations of chess games
-- **Customizable Settings**: Adjust frame delay, board size, and move highlighting
-- **Download Functionality**: Download generated GIFs directly to your device
-- **Modern UI**: Beautiful, responsive design with Tailwind CSS
-- **Client-side Only**: No backend required, everything runs in the browser
+**ChessToGif** is a fully functional **Next.js** application that allows users to input chess moves and generate animated GIFs of chess games — all within the browser.  
+It provides a **modern, responsive interface** and runs **entirely client-side**, requiring no backend setup.  
 
-## Technologies Used
+## 🌐 Live Demo  
 
-- **Next.js 14**: React framework with App Router
-- **TypeScript**: Type-safe JavaScript
-- **Tailwind CSS**: Utility-first CSS framework
-- **chess.js**: Chess game logic and move validation
-- **gifenc**: GIF encoding library for creating animations
-- **HTML Canvas**: Chess board rendering
+🚀 **Try it here:** [https://chesstogif.anandsundaramoorthy.com](https://chesstogif.anandsundaramoorthy.com)
 
-## Getting Started
+### 🔧 Technologies Used  
+- **Next.js 14** – React framework with App Router  
+- **TypeScript** – Type-safe JavaScript  
+- **Tailwind CSS** – Utility-first CSS framework  
+- **chess.js** – Chess game logic and move validation  
+- **gifenc** – GIF encoding library for animations  
+- **HTML Canvas** – For rendering the chess board  
 
-### Prerequisites
+## ⚙️ Installation  
 
-- Node.js 18+ 
-- npm or yarn
+### 🧾 Prerequisites  
+- Node.js 18+  
+- npm or yarn  
 
-### Installation
+### 🪜 Steps  
+1. **Clone the repository**  
+   ```bash
+   git clone <repository-url>
+   cd chesstogif
+````
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd chesstogif
-```
+2. **Install dependencies**
 
-2. Install dependencies:
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-3. Run the development server:
-```bash
-npm run dev
-```
+3. **Run the development server**
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+   ```bash
+   npm run dev
+   ```
 
-### Building for Production
+   Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-```bash
-npm run build
-npm start
-```
+4. **Build for production (optional)**
 
-## Usage
+   ```bash
+   npm run build
+   npm start
+   ```
 
-### Basic Usage
+## 🚀 Use/Run the Project
 
-1. **Enter Chess Moves**: Paste or type chess moves in the text area. The app supports:
-   - Standard Algebraic Notation (SAN): `e4 e5 Nf3 Nc6`
-   - Portable Game Notation (PGN): Full game notation with move numbers
+1. **Enter Chess Moves**
 
-2. **Preview Position**: The current board position updates in real-time as you type
+   * Paste or type moves in the text area.
+   * Supports:
 
-3. **Adjust Settings** (optional):
-   - **Frame Delay**: Control the speed of the animation (500ms - 3000ms)
-   - **Board Size**: Adjust the size of the chess board (200px - 600px)
-   - **Highlight Last Move**: Toggle highlighting of the most recent move
+     * **SAN (Standard Algebraic Notation):** `e4 e5 Nf3 Nc6`
+     * **PGN (Portable Game Notation):** Includes move numbers.
 
-4. **Generate GIF**: Click the "Generate GIF" button to create an animated GIF
+2. **Preview Board in Real-Time**
 
-5. **Download**: Use the download button to save the GIF to your device
+   * The board updates instantly as you type.
 
-### Example Moves
+3. **Adjust Settings** (optional)
 
-Try these example moves to get started:
+   * Frame Delay (speed): `500ms – 3000ms`
+   * Board Size: `200px – 600px`
+   * Highlight Last Move: On/Off toggle
 
-**Ruy Lopez Opening:**
+4. **Generate GIF**
+
+   * Click **Generate GIF** to create your animation.
+
+5. **Download GIF**
+
+   * Use the **Download** button to save it to your device.
+
+### ♟️ Example Moves
+
+#### Ruy Lopez Opening
+
 ```
 e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Nb8 d4 Nbd7
 ```
 
-**Sicilian Defense:**
+#### Sicilian Defense
+
 ```
 e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Be3 e5 Nb3 Be6 f3 Be7 Qd2 O-O O-O-O Nbd7
 ```
 
-**Queen's Gambit:**
+#### Queen’s Gambit
+
 ```
 d4 d5 c4 e6 Nc3 Nf6 Bg5 Be7 e3 O-O Nf3 h6 Bh4 b6
 ```
 
-## Project Structure
+## 🌟 Features
 
-```
-chesstogif/
-├── app/
-│   ├── globals.css          # Global styles with Tailwind
-│   ├── layout.tsx           # Root layout component
-│   └── page.tsx             # Main application page
-├── components/
-│   └── ChessBoard.tsx       # Chess board canvas component
-├── utils/
-│   ├── chessGame.ts         # Chess game logic and move parsing
-│   └── gifGenerator.ts      # GIF generation utilities
-├── package.json
-├── tailwind.config.js
-├── tsconfig.json
-└── README.md
-```
+* ✅ **Chess Move Input** – Supports both PGN and SAN formats
+* ♟️ **Real-time Board Preview** – Instantly updates the board
+* 🎞️ **Animated GIF Generation** – Create smooth chess animations
+* ⚙️ **Customizable Settings** – Adjust board size, delay, and highlights
+* 💾 **Download Functionality** – Save GIFs directly to your device
+* 🖥️ **Modern UI** – Clean and responsive with Tailwind CSS
+* 🌐 **Client-side Only** – No backend required
 
-## Key Components
-
-### ChessBoard Component
-- Renders chess positions on HTML Canvas
-- Supports customizable board sizes
-- Optional move highlighting
-- Unicode chess piece symbols
-
-### ChessGameManager Class
-- Handles chess game logic using chess.js
-- Parses and validates moves
-- Manages game state and FEN positions
-- Supports PGN and SAN notation
-
-### GIF Generation
-- Captures canvas frames for each position
-- Uses gifenc library for efficient GIF creation
-- Supports customizable frame delays and quality settings
-
-## Customization
-
-### Adding Custom Themes
-You can customize the chess board appearance by modifying the colors in `components/ChessBoard.tsx`:
-
-```typescript
-// Light squares
-ctx.fillStyle = '#F0D9B5' // Change this for different light square color
-
-// Dark squares  
-ctx.fillStyle = '#B58863' // Change this for different dark square color
-```
-
-### Adjusting Piece Symbols
-Modify the `pieceSymbols` object in `components/ChessBoard.tsx` to use different Unicode chess pieces or custom symbols.
-
-### Styling
-The app uses Tailwind CSS for styling. You can customize the design by modifying the classes in the components or extending the Tailwind configuration in `tailwind.config.js`.
-
-## Browser Compatibility
-
-The app works in all modern browsers that support:
-- ES6+ JavaScript features
-- HTML5 Canvas API
-- Web Workers (for GIF generation)
-- File API (for downloads)
-
-## Performance Considerations
-
-- GIF generation is computationally intensive and may take a few seconds for games with many moves
-- Large board sizes (600px+) may impact performance
-- The app uses Web Workers where possible to avoid blocking the UI
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Add tests if applicable
-5. Submit a pull request
+5. Submit a Pull Request
 
-## License
+## 👨‍💻 Contributors
 
-This project is open source and available under the [MIT License](LICENSE).
+<a href="https://github.com/anandsundaramoorthysa/ChessToGif/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=anandsundaramoorthysa/ChessToGif" />
+</a>
 
-## Acknowledgments
+## 🪪 License
 
-- [chess.js](https://github.com/jhlywa/chess.js) for chess game logic
-- [gifenc](https://github.com/mattdesl/gifenc) for GIF encoding
-- [Tailwind CSS](https://tailwindcss.com/) for styling
-- [Next.js](https://nextjs.org/) for the React framework
+This project is open source and available under the **MIT License**.
+
+## 📬 Contact Me
+
+If you have any questions, feedback, or suggestions, feel free to reach out to the author:
+
+**ANAND SUNDARAMOORTHY SA**
+📧 [sanand03072005@gmail.com](mailto:sanand03072005@gmail.com?subject=Question%20about%20ChessToGif%20Project&body=Dear%20Author%2C%0A%0AI%20have%20a%20question%20regarding%20the%20ChessToGif%20project%2E%0A%0A%5BYour%20Question%20Here%5D%0A%0AThank%20you%21%0A%5BYour%20Name%5D)
+
+
+Would you like me to add a **"Project Demo"** or **"Preview Screenshot"** section above *About Project* (if you plan to host it on Vercel or Netlify)? It’s a good practice for GitHub README.
+```
