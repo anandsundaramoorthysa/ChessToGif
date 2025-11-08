@@ -21,7 +21,7 @@ It provides a **modern, responsive interface** and runs **entirely client-side**
 🚀 **Try it here:** [https://chesstogif.anandsundaramoorthy.com](https://chesstogif.anandsundaramoorthy.com)
 
 ### 🔧 Technologies Used  
-- **Next.js 14** – React framework with App Router  
+- **Next.js** – React framework with App Router  
 - **TypeScript** – Type-safe JavaScript  
 - **Tailwind CSS** – Utility-first CSS framework  
 - **chess.js** – Chess game logic and move validation  
@@ -31,13 +31,13 @@ It provides a **modern, responsive interface** and runs **entirely client-side**
 ## ⚙️ Installation  
 
 ### 🧾 Prerequisites  
-- Node.js 18+  
+- Node.js 
 - npm or yarn  
 
 ### 🪜 Steps  
 1. **Clone the repository**  
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/anandsundaramoorthysa/ChessToGif/
    cd chesstogif
    ````
 
@@ -54,13 +54,6 @@ It provides a **modern, responsive interface** and runs **entirely client-side**
    ```
 
    Then open [http://localhost:3000](http://localhost:3000) in your browser.
-
-4. **Build for production (optional)**
-
-   ```bash
-   npm run build
-   npm start
-   ```
 
 ## 🚀 Use/Run the Project
 
