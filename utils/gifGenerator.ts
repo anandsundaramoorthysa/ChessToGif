@@ -39,7 +39,8 @@ function renderChessBoard(
   ctx: CanvasRenderingContext2D,
   fen: string,
   boardSize: number,
-  movingPiece?: { symbol: string; x: number; y: number; color: 'w' | 'b' }
+  // Only hide the specific moving piece at its origin square to avoid hiding all similar pieces
+  movingPiece?: { symbol: string; x: number; y: number; color: 'w' | 'b'; fromFile: number; fromRank: number }
 ): void {
   const squareSize = boardSize / 8
   const pieceSymbols: { [key: string]: string } = {
@@ -78,8 +79,8 @@ function renderChessBoard(
         const x = file * squareSize
         const y = rankIndex * squareSize
 
-        // Don't draw the piece if it's the moving piece
-        if (!movingPiece || char !== movingPiece.symbol) {
+  // Don't draw the piece if it's the moving piece at its origin square only
+  if (!movingPiece || !(file === movingPiece.fromFile && rankIndex === movingPiece.fromRank)) {
           // Enhanced piece rendering for better visibility
           const isWhite = char === char.toUpperCase()
           
@@ -244,7 +245,9 @@ export async function generateAnimatedChessGif(
           symbol: pieceSymbol,
           x: currentPos.x,
           y: currentPos.y,
-          color: move.color
+          color: move.color,
+          fromFile: fromCoords.file,
+          fromRank: fromCoords.rank
         })
         
         // Capture frame
@@ -331,22 +334,15 @@ export function downloadImage(imageData: Uint8Array, filename: string = 'chess-s
   URL.revokeObjectURL(url)
 }
 
-// Convert frames to GIF using a working method
+// Convert frames to GIF using gifenc (more reliable in browser/bundled environments)
 async function framesToGif(frames: ImageData[], width: number, height: number, delay: number): Promise<Uint8Array> {
+  // Try gif.js first (better handling of canvases/colors in many setups).
+  // If gif.js fails for any reason, fall back to gifenc.
   try {
-    // Try gif.js first
-    const gifData = await createGifWithGifJs(frames, width, height, delay)
-    return gifData
-  } catch (error) {
-    console.error('gif.js failed, trying gifenc:', error)
-    // Try gifenc as fallback
-    try {
-      const gifData = await createGifWithGifenc(frames, width, height, delay)
-      return gifData
-    } catch (gifencError) {
-      console.error('gifenc also failed:', gifencError)
-      throw new Error('Failed to generate animated GIF - both gif.js and gifenc failed')
-    }
+    return await createGifWithGifJs(frames, width, height, delay)
+  } catch (err) {
+    console.warn('gif.js failed, falling back to gifenc:', err)
+    return await createGifWithGifenc(frames, width, height, delay)
   }
 }
 
@@ -381,12 +377,13 @@ async function createGifWithGifJs(frames: ImageData[], width: number, height: nu
       }
       // Create GIF instance with simpler configuration
       const gif = new GIF({
-        workers: 0, // No workers to avoid timeout issues
+        workers: 0, // No workers to avoid worker script path issues in bundlers
         quality: 10,
         width: width,
         height: height,
         workerScript: undefined,
-        dither: false, // Disable dithering for better performance
+        // Enable dithering to better preserve subtle dark colors (black pieces + shadows)
+        dither: true,
         transparent: null, // No transparency
         background: '#FFFFFF' // White background
       })
